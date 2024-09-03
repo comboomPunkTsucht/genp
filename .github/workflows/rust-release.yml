@@ -21,20 +21,17 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
 
-      - name: Install `cross`
-        run: cargo install cross
-
       - name: Install target for Linux
         run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
 
       - name: Build for x86_64 Linux
         run: |
-          cross build --release --target x86_64-unknown-linux-gnu
+          cargo build --release --target x86_64-unknown-linux-gnu
           cp target/x86_64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-x86_64
 
       - name: Build for aarch64 Linux
         run: |
-          cross build --release --target aarch64-unknown-linux-gnu
+          cargo build --release --target aarch64-unknown-linux-gnu
           cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
 
       - name: Push Linux binaries to temp branch
