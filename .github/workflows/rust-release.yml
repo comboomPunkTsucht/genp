@@ -37,17 +37,17 @@ jobs:
         cross build --release --target aarch64-unknown-linux-gnu
         cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
 
-    - name: Push binaries to temp branch
+    - name: Push Linux binaries to temp branch
       run: |
         git config --global user.email "mcpeaps_HD@outlook.com"
         git config --global user.name "mcpeapsUnterstrichHD"
-        git checkout -b temp-binaries
+        git checkout -b temp-binaries-linux || git checkout temp-binaries-linux
         mkdir -p binaries/linux
         cp dino_cli_game-x86_64 dino_cli_game-aarch64 binaries/linux/
         git add binaries/
         git commit -m "Add Linux binaries"
-        git pull origin temp-binaries || true
-        git push origin temp-binaries
+        git pull origin temp-binaries-linux --rebase || true
+        git push origin temp-binaries-linux
 
   build-macos:
     runs-on: macos-latest
@@ -74,17 +74,17 @@ jobs:
         cargo build --release --target aarch64-apple-darwin
         cp target/aarch64-apple-darwin/release/dino_cli_game dino_cli_game-macos-aarch64
 
-    - name: Push binaries to temp branch
+    - name: Push macOS binaries to temp branch
       run: |
         git config --global user.email "mcpeaps_HD@outlook.com"
         git config --global user.name "mcpeapsUnterstrichHD"
-        git checkout -b temp-binaries
+        git checkout -b temp-binaries-macos || git checkout temp-binaries-macos
         mkdir -p binaries/macos
         cp dino_cli_game-macos-x86_64 dino_cli_game-macos-aarch64 binaries/macos/
         git add binaries/
         git commit -m "Add macOS binaries"
-        git pull origin temp-binaries || true
-        git push origin temp-binaries
+        git pull origin temp-binaries-macos --rebase || true
+        git push origin temp-binaries-macos
 
   release:
     needs: [build-linux, build-macos]
@@ -93,10 +93,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Checkout temp branch
+    - name: Checkout Linux temp branch
       run: |
-        git fetch origin temp-binaries
-        git checkout temp-binaries
+        git fetch origin temp-binaries-linux
+        git checkout temp-binaries-linux
+
+    - name: Checkout macOS temp branch
+      run: |
+        git fetch origin temp-binaries-macos
+        git checkout temp-binaries-macos
 
     - name: Extract version from Cargo.toml
       id: extract_version
@@ -122,6 +127,7 @@ jobs:
           --title "Release ${VERSION}" \
           --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
 
-    - name: Delete temp branch
+    - name: Delete temp branches
       run: |
-        git push origin --delete temp-binaries
+        git push origin --delete temp-binaries-linux
+        git push origin --delete temp-binaries-macos
