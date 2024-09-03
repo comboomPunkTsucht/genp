@@ -1,0 +1,32 @@
+name: Build and Release Rust CLI
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger den Workflow bei Tag-Änderungen im Format vX.X.X
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Rust
+      uses: actions/setup-rust@v1
+      #with:
+       # rust-version: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
+
+    - name: Build
+      run: cargo build --release
+
+    - name: Create Release
+      id: create_release
+      run: |
+        VERSION=$(date +'%Y-%m-%d')
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        
+        gh release create "${VERSION}" target/release/your_binary_name --title "Release ${VERSION}" --notes "Release created on ${VERSION}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
