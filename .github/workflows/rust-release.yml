@@ -46,6 +46,7 @@ jobs:
         cp dino_cli_game-x86_64 dino_cli_game-aarch64 binaries/linux/
         git add binaries/
         git commit -m "Add Linux binaries"
+        git pull origin temp-binaries || true
         git push origin temp-binaries
 
   build-macos:
@@ -82,6 +83,7 @@ jobs:
         cp dino_cli_game-macos-x86_64 dino_cli_game-macos-aarch64 binaries/macos/
         git add binaries/
         git commit -m "Add macOS binaries"
+        git pull origin temp-binaries || true
         git push origin temp-binaries
 
   release:
