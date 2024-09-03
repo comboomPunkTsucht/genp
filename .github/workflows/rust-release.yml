@@ -1,8 +1,12 @@
-# .github/workflows/release.yml
+name: Build and Release Rust CLI
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   release:
