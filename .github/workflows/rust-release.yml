@@ -30,12 +30,12 @@ jobs:
     - name: Build for x86_64 Linux
       run: |
         cross build --release --target x86_64-unknown-linux-gnu
-        ls -R target/x86_64-unknown-linux-gnu/release/
+        cp target/x86_64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-x86_64
 
     - name: Build for aarch64 Linux
       run: |
         cross build --release --target aarch64-unknown-linux-gnu
-        ls -R target/aarch64-unknown-linux-gnu/release/
+        cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
 
   build-macos:
     runs-on: macos-latest
@@ -55,12 +55,12 @@ jobs:
     - name: Build for x86_64 macOS
       run: |
         cargo build --release --target x86_64-apple-darwin
-        ls -R target/x86_64-apple-darwin/release/
+        cp target/x86_64-apple-darwin/release/dino_cli_game dino_cli_game-macos-x86_64
 
     - name: Build for aarch64 macOS
       run: |
         cargo build --release --target aarch64-apple-darwin
-        ls -R target/aarch64-apple-darwin/release/
+        cp target/aarch64-apple-darwin/release/dino_cli_game dino_cli_game-macos-aarch64
 
   release:
     needs: [build-linux, build-macos]
@@ -77,6 +77,7 @@ jobs:
 
     - name: List files in target directory
       run: |
+        echo "Listing files in target directory:"
         ls -R target
 
     - name: Upload Release Artifacts
@@ -84,10 +85,10 @@ jobs:
       with:
         name: dino_cli_game
         path: |
-          target/x86_64-unknown-linux-gnu/release/dino_cli_game
-          target/aarch64-unknown-linux-gnu/release/dino_cli_game
-          target/x86_64-apple-darwin/release/dino_cli_game
-          target/aarch64-apple-darwin/release/dino_cli_game
+          dino_cli_game-x86_64
+          dino_cli_game-aarch64
+          dino_cli_game-macos-x86_64
+          dino_cli_game-macos-aarch64
 
     - name: Create Release
       id: create_release
@@ -100,10 +101,10 @@ jobs:
 
         # Create the release
         gh release create "${VERSION}" \
-          target/x86_64-unknown-linux-gnu/release/dino_cli_game \
-          target/aarch64-unknown-linux-gnu/release/dino_cli_game \
-          target/x86_64-apple-darwin/release/dino_cli_game \
-          target/aarch64-apple-darwin/release/dino_cli_game \
+          dino_cli_game-x86_64 \
+          dino_cli_game-aarch64 \
+          dino_cli_game-macos-x86_64 \
+          dino_cli_game-macos-aarch64 \
           --title "Release ${VERSION}" \
           --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
       env:
