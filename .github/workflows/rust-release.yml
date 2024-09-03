@@ -2,8 +2,9 @@ name: Build and Release Rust CLI
 
 on:
   push:
-    tags:
-      - 'v*.*.*'  # Trigger den Workflow bei Tag-Änderungen im Format vX.X.X
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -15,8 +16,8 @@ jobs:
 
     - name: Set up Rust
       uses: actions/setup-rust@v1
-      #with:
-       # rust-version: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
+      with:
+        rust-version: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
 
     - name: Build
       run: cargo build --release
