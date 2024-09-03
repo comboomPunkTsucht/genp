@@ -39,6 +39,8 @@ jobs:
 
     - name: Push binaries to temp branch
       run: |
+        git config --global user.email "mcpeaps_HD@outlook.com"
+        git config --global user.name "mcpeapsUnterstrichHD"
         git checkout -b temp-binaries
         mkdir -p binaries/linux
         cp dino_cli_game-x86_64 dino_cli_game-aarch64 binaries/linux/
@@ -73,6 +75,8 @@ jobs:
 
     - name: Push binaries to temp branch
       run: |
+        git config --global user.email "mcpeaps_HD@outlook.com"
+        git config --global user.name "mcpeapsUnterstrichHD"
         git checkout -b temp-binaries
         mkdir -p binaries/macos
         cp dino_cli_game-macos-x86_64 dino_cli_game-macos-aarch64 binaries/macos/
