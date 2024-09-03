@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     tags:
-      - v*.*.*
+      - ref: refs/tags/$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 
 jobs:
   create-release:
