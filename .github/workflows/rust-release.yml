@@ -37,6 +37,7 @@ jobs:
           else
             echo "Tag $tag does not exist remotely."
           fi
+          sleep 10
 
       - name: Create GitHub Release
         env:
