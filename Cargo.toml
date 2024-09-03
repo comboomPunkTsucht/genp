@@ -5,7 +5,3 @@ edition = "2021"
 
 [dependencies]
 clap = "4.5.16"
-cross = "0.2.5"
-crossterm = "0.28.1"
-ctrlc = "3.4.5"
-signal-hook = "0.3.17"

@@ -1,8 +1,5 @@
 use clap::{Command, Arg};
 
-use std::io;
-use std::process::exit;
-
 fn main() {
     let version = env!("CARGO_PKG_VERSION");
     let command = Command::new("Dino CLI Game")
