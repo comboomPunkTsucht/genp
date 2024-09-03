@@ -126,6 +126,8 @@ jobs:
           binaries/macos/dino_cli_game-macos-aarch64 \
           --title "Release ${VERSION}" \
           --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set GH_TOKEN for GitHub CLI
 
     - name: Delete temp branches
       run: |
