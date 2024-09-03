@@ -71,14 +71,15 @@ jobs:
           target/x86_64-apple-darwin/release/dino_cli_game
           target/aarch64-apple-darwin/release/dino_cli_game
 
+    - name: List files in target directory
+      run: |
+        ls -R target
+
     - name: Create Release
       id: create_release
       run: |
         VERSION=$(date +'%Y-%m-%d')
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-        # Install GitHub CLI
-        sudo apt-get install gh
 
         # Create the release
         gh release create "${VERSION}" \
