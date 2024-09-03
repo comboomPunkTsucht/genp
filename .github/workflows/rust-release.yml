@@ -28,10 +28,14 @@ jobs:
       run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
 
     - name: Build for x86_64 Linux
-      run: cross build --release --target x86_64-unknown-linux-gnu
+      run: |
+        cross build --release --target x86_64-unknown-linux-gnu
+        ls -R target/x86_64-unknown-linux-gnu/release/
 
     - name: Build for aarch64 Linux
-      run: cross build --release --target aarch64-unknown-linux-gnu
+      run: |
+        cross build --release --target aarch64-unknown-linux-gnu
+        ls -R target/aarch64-unknown-linux-gnu/release/
 
   build-macos:
     runs-on: macos-latest
@@ -49,10 +53,14 @@ jobs:
       run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
 
     - name: Build for x86_64 macOS
-      run: cargo build --release --target x86_64-apple-darwin
+      run: |
+        cargo build --release --target x86_64-apple-darwin
+        ls -R target/x86_64-apple-darwin/release/
 
     - name: Build for aarch64 macOS
-      run: cargo build --release --target aarch64-apple-darwin
+      run: |
+        cargo build --release --target aarch64-apple-darwin
+        ls -R target/aarch64-apple-darwin/release/
 
   release:
     needs: [build-linux, build-macos]
