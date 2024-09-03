@@ -21,6 +21,13 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
 
+      - name: Set up Cross-Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-aarch64-linux-gnu
+          sudo apt-get install libc6-dev-arm64-cross
+          export CC=aarch64-linux-gnu-gcc
+
       - name: Install target for Linux
         run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
 
