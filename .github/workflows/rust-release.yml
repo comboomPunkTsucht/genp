@@ -54,32 +54,8 @@ jobs:
     - name: Build for aarch64 macOS
       run: cargo build --release --target aarch64-apple-darwin
 
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
-
-    - name: Install `cross`
-      run: cargo install cross
-
-    - name: Install target for Windows
-      run: rustup target add x86_64-pc-windows-msvc aarch64-pc-windows-msvc
-
-    - name: Build for x86_64 Windows
-      run: cross build --release --target x86_64-pc-windows-msvc
-
-    - name: Build for aarch64 Windows
-      run: cross build --release --target aarch64-pc-windows-msvc
-
   release:
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux, build-macos]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -94,8 +70,6 @@ jobs:
           target/aarch64-unknown-linux-gnu/release/dino_cli_game
           target/x86_64-apple-darwin/release/dino_cli_game
           target/aarch64-apple-darwin/release/dino_cli_game
-          target/x86_64-pc-windows-msvc/release/dino_cli_game.exe
-          target/aarch64-pc-windows-msvc/release/dino_cli_game.exe
 
     - name: Create Release
       id: create_release
@@ -112,8 +86,6 @@ jobs:
           target/aarch64-unknown-linux-gnu/release/dino_cli_game \
           target/x86_64-apple-darwin/release/dino_cli_game \
           target/aarch64-apple-darwin/release/dino_cli_game \
-          target/x86_64-pc-windows-msvc/release/dino_cli_game.exe \
-          target/aarch64-pc-windows-msvc/release/dino_cli_game.exe \
           --title "Release ${VERSION}" \
           --notes "Release created on ${VERSION}"
       env:
