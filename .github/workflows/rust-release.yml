@@ -1,151 +1,31 @@
-name: Build and Release Rust CLI
+# .github/workflows/release.yml
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  release:
+    types: [created]
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
-
-      - name: Install `cross`
-        run: cargo install cross
-
-      - name: Install target for Linux
-        run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
-
-      - name: Build for x86_64 Linux
-        run: |
-          cross build --release --target x86_64-unknown-linux-gnu
-          cp target/x86_64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-x86_64
-
-      - name: Build for aarch64 Linux
-        run: |
-          cross build --release --target aarch64-unknown-linux-gnu
-          cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
-
-      - name: Push Linux binaries to temp branch
-        run: |
-          git config --global user.email "mcpeaps_HD@outlook.com"
-          git config --global user.name "mcpeapsUnterstrichHD"
-          git checkout -b temp-binaries-linux || git checkout temp-binaries-linux
-          mkdir -p linux
-          cp dino_cli_game-x86_64 dino_cli_game-aarch64 linux/
-          git add linux/
-          git commit -m "Add Linux binaries"
-          git pull origin temp-binaries-linux --rebase || true
-          git push origin temp-binaries-linux
-
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
-
-      - name: Install target for macOS
-        run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
-
-      - name: Build for x86_64 macOS
-        run: cargo build --release --target x86_64-apple-darwin
-
-      - name: Build for aarch64 macOS
-        run: cargo build --release --target aarch64-apple-darwin
-
-      - name: Create Universal Binary for macOS
-        run: |
-          lipo -create -output dino_cli_game-macos-universal target/x86_64-apple-darwin/release/dino_cli_game target/aarch64-apple-darwin/release/dino_cli_game
-
-      - name: Push macOS binaries to temp branch
-        run: |
-          git config --global user.email "mcpeaps_HD@outlook.com"
-          git config --global user.name "mcpeapsUnterstrichHD"
-          git checkout -b temp-binaries-macos || git checkout temp-binaries-macos
-          mkdir -p macos
-          cp dino_cli_game-macos-universal macos/
-          git add macos/
-          git commit -m "Add macOS universal binary"
-          git pull origin temp-binaries-macos --rebase || true
-          git push origin temp-binaries-macos
-
   release:
-    needs: [build-linux, build-macos]
+    name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            archive: zip
+          - target: x86_64-unknown-linux-gnu
+            archive: tar.gz tar.xz tar.zst
+          - target: x86_64-apple-darwin
+            archive: zip
+          - target: aarch64-apple-darwin
+            archive: zip
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Extract version from Cargo.toml
-        id: extract_version
-        run: |
-          VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - name: Download Linux and macOS binaries
-        run: |
-          mkdir -p linux macos
-          wget https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-linux/linux/dino_cli_game-x86_64 -O linux/dino_cli_game-x86_64 || echo "Failed to download x86_64 Linux binary"
-          wget https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-linux/linux/dino_cli_game-aarch64 -O linux/dino_cli_game-aarch64 || echo "Failed to download aarch64 Linux binary"
-          wget https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-macos/macos/dino_cli_game-macos-universal -O macos/dino_cli_game-macos-universal || echo "Failed to download macOS universal binary"
-
-      - name: Check if release exists
-        id: check_release
-        run: |
-          if gh release view "${VERSION}" > /dev/null 2>&1; then
-            echo "Release ${VERSION} exists"
-            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "Release ${VERSION} does not exist"
-            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
-          fi
+      - uses: actions/checkout@master
+      - name: Compile and release
+        uses: rust-build/rust-build.action@v1.4.5
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create or Update Release
-        if: env.RELEASE_EXISTS == 'false'
-        run: |
-          echo "Creating new release ${VERSION}"
-          gh release create "${VERSION}" \
-            linux/dino_cli_game-x86_64 \
-            linux/dino_cli_game-aarch64 \
-            macos/dino_cli_game-macos-universal \
-            --title "Release ${VERSION}" \
-            --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update Release
-        if: env.RELEASE_EXISTS == 'true'
-        run: |
-          echo "Updating release ${VERSION}"
-          gh release upload "${VERSION}" \
-            linux/dino_cli_game-x86_64 \
-            linux/dino_cli_game-aarch64 \
-            macos/dino_cli_game-macos-universal \
-            --clobber
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete temp branches
-        if: always()
-        run: |
-          git push origin --delete temp-binaries-linux || echo "Failed to delete temp-binaries-linux branch"
-          git push origin --delete temp-binaries-macos || echo "Failed to delete temp-binaries-macos branch"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
