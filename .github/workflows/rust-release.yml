@@ -12,79 +12,79 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
 
-    - name: Install `cross`
-      run: cargo install cross
+      - name: Install `cross`
+        run: cargo install cross
 
-    - name: Install target for Linux
-      run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+      - name: Install target for Linux
+        run: rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
 
-    - name: Build for x86_64 Linux
-      run: |
-        cross build --release --target x86_64-unknown-linux-gnu
-        cp target/x86_64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-x86_64
+      - name: Build for x86_64 Linux
+        run: |
+          cross build --release --target x86_64-unknown-linux-gnu
+          cp target/x86_64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-x86_64
 
-    - name: Build for aarch64 Linux
-      run: |
-        cross build --release --target aarch64-unknown-linux-gnu
-        cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
+      - name: Build for aarch64 Linux
+        run: |
+          cross build --release --target aarch64-unknown-linux-gnu
+          cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
 
-    - name: Push Linux binaries to temp branch
-      run: |
-        git config --global user.email "mcpeaps_HD@outlook.com"
-        git config --global user.name "mcpeapsUnterstrichHD"
-        git checkout -b temp-binaries-linux || git checkout temp-binaries-linux
-        mkdir -p linux
-        cp dino_cli_game-x86_64 dino_cli_game-aarch64 linux/
-        git add linux/
-        git commit -m "Add Linux binaries"
-        git pull origin temp-binaries-linux --rebase || true
-        git push origin temp-binaries-linux
+      - name: Push Linux binaries to temp branch
+        run: |
+          git config --global user.email "mcpeaps_HD@outlook.com"
+          git config --global user.name "mcpeapsUnterstrichHD"
+          git checkout -b temp-binaries-linux || git checkout temp-binaries-linux
+          mkdir -p linux
+          cp dino_cli_game-x86_64 dino_cli_game-aarch64 linux/
+          git add linux/
+          git commit -m "Add Linux binaries"
+          git pull origin temp-binaries-linux --rebase || true
+          git push origin temp-binaries-linux
 
   build-macos:
     runs-on: macos-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
 
-    - name: Install target for macOS
-      run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
+      - name: Install target for macOS
+        run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
 
-    - name: Build for x86_64 macOS
-      run: |
-        cargo build --release --target x86_64-apple-darwin
-        cp target/x86_64-apple-darwin/release/dino_cli_game dino_cli_game-macos-x86_64
+      - name: Build for x86_64 macOS
+        run: |
+          cargo build --release --target x86_64-apple-darwin
+          cp target/x86_64-apple-darwin/release/dino_cli_game dino_cli_game-macos-x86_64
 
-    - name: Build for aarch64 macOS
-      run: |
-        cargo build --release --target aarch64-apple-darwin
-        cp target/aarch64-apple-darwin/release/dino_cli_game dino_cli_game-macos-aarch64
+      - name: Build for aarch64 macOS
+        run: |
+          cargo build --release --target aarch64-apple-darwin
+          cp target/aarch64-apple-darwin/release/dino_cli_game dino_cli_game-macos-aarch64
 
-    - name: Push macOS binaries to temp branch
-      run: |
-        git config --global user.email "mcpeaps_HD@outlook.com"
-        git config --global user.name "mcpeapsUnterstrichHD"
-        git checkout -b temp-binaries-macos || git checkout temp-binaries-macos
-        mkdir -p macos
-        cp dino_cli_game-macos-x86_64 dino_cli_game-macos-aarch64 macos/
-        git add macos/
-        git commit -m "Add macOS binaries"
-        git pull origin temp-binaries-macos --rebase || true
-        git push origin temp-binaries-macos
+      - name: Push macOS binaries to temp branch
+        run: |
+          git config --global user.email "mcpeaps_HD@outlook.com"
+          git config --global user.name "mcpeapsUnterstrichHD"
+          git checkout -b temp-binaries-macos || git checkout temp-binaries-macos
+          mkdir -p macos
+          cp dino_cli_game-macos-x86_64 dino_cli_game-macos-aarch64 macos/
+          git add macos/
+          git commit -m "Add macOS binaries"
+          git pull origin temp-binaries-macos --rebase || true
+          git push origin temp-binaries-macos
 
   release:
     needs: [build-linux, build-macos]
@@ -99,30 +99,21 @@ jobs:
           VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Setup Git for sparse checkout
+      - name: Download Linux binaries
         run: |
-          git config --global core.sparseCheckout true
+          mkdir -p linux
+          wget -q https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-linux/linux/dino_cli_game-x86_64 -O linux/dino_cli_game-x86_64
+          wget -q https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-linux/linux/dino_cli_game-aarch64 -O linux/dino_cli_game-aarch64
 
-      - name: Pull only linux/ directory from temp-binaries-linux branch
+      - name: Download macOS binaries
         run: |
-          git remote set-branches --add origin temp-binaries-linux
-          echo "linux/" >> .git/info/sparse-checkout
-          git fetch origin temp-binaries-linux
-          git checkout temp-binaries-linux
+          mkdir -p macos
+          wget -q https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-macos/macos/dino_cli_game-macos-x86_64 -O macos/dino_cli_game-macos-x86_64
+          wget -q https://github.com/comboomPunkTsucht/dino_cli_game/raw/temp-binaries-macos/macos/dino_cli_game-macos-aarch64 -O macos/dino_cli_game-macos-aarch64
 
-      - name: Pull only macos/ directory from temp-binaries-macos branch
-        run: |
-          git remote set-branches --add origin temp-binaries-macos
-          echo "macos/" >> .git/info/sparse-checkout
-          git fetch origin temp-binaries-macos
-          git checkout temp-binaries-macos
-
-      - name: List files in linux directory
+      - name: List downloaded files
         run: |
           ls -al linux/
-
-      - name: List files in macos directory
-        run: |
           ls -al macos/
 
       - name: Create Release
