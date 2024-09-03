@@ -16,8 +16,8 @@ jobs:
 
     - name: Set up Rust
       uses: actions/setup-rust@v1
-      #with:
-       # rust-version: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
+      with:
+        rust-version: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
 
     - name: Build
       run: cargo build --release
