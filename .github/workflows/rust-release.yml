@@ -90,48 +90,63 @@ jobs:
     needs: [build-linux, build-macos]
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Extract version from Cargo.toml
-      id: extract_version
-      run: |
-        VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+      - name: Extract version from Cargo.toml
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-    - name: Checkout and update Linux temp branch
-      run: |
-        git fetch origin temp-binaries-linux
-        git checkout temp-binaries-linux
-        git pull origin temp-binaries-linux
+      - name: Setup Git for sparse checkout
+        run: |
+          git config --global core.sparseCheckout true
 
-    - name: Checkout and update macOS temp branch
-      run: |
-        git fetch origin temp-binaries-macos
-        git checkout temp-binaries-macos
-        git pull origin temp-binaries-macos
+      - name: Pull only linux/ directory from temp-binaries-linux branch
+        run: |
+          git remote set-branches --add origin temp-binaries-linux
+          echo "linux/" >> .git/info/sparse-checkout
+          git fetch origin temp-binaries-linux
+          git checkout temp-binaries-linux
 
-    - name: Create Release
-      id: create_release
-      run: |
-        echo "VERSION=${VERSION}"
+      - name: Pull only macos/ directory from temp-binaries-macos branch
+        run: |
+          git remote set-branches --add origin temp-binaries-macos
+          echo "macos/" >> .git/info/sparse-checkout
+          git fetch origin temp-binaries-macos
+          git checkout temp-binaries-macos
 
-        # Install GitHub CLI
-        sudo apt-get update
-        sudo apt-get install -y gh
+      - name: List files in linux directory
+        run: |
+          ls -al linux/
 
-        # Create the release
-        gh release create "${VERSION}" \
-          linux/dino_cli_game-x86_64 \
-          linux/dino_cli_game-aarch64 \
-          macos/dino_cli_game-macos-x86_64 \
-          macos/dino_cli_game-macos-aarch64 \
-          --title "Release ${VERSION}" \
-          --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set GH_TOKEN for GitHub CLI
+      - name: List files in macos directory
+        run: |
+          ls -al macos/
 
-    - name: Delete temp branches
-      run: |
-        git push origin --delete temp-binaries-linux
-        git push origin --delete temp-binaries-macos
+      - name: Create Release
+        id: create_release
+        run: |
+          echo "VERSION=${VERSION}"
+
+          # Install GitHub CLI
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+          # Create the release
+          gh release create "${VERSION}" \
+            linux/dino_cli_game-x86_64 \
+            linux/dino_cli_game-aarch64 \
+            macos/dino_cli_game-macos-x86_64 \
+            macos/dino_cli_game-macos-aarch64 \
+            --title "Release ${VERSION}" \
+            --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete temp branches
+        if: always()  # Dieser Schritt wird immer ausgeführt, egal ob vorherige Schritte erfolgreich waren oder nicht.
+        run: |
+          git push origin --delete temp-binaries-linux
+          git push origin --delete temp-binaries-macos
