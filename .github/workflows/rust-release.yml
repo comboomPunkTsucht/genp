@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: x86_64-pc-windows-msvc
+          - target: x86_64-uwp-windows-msvc
             archive: zip
           - target: x86_64-unknown-linux-gnu
             archive: tar.gz tar.xz tar.zst
