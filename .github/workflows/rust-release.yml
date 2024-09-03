@@ -93,21 +93,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Checkout Linux temp branch
-      run: |
-        git fetch origin temp-binaries-linux
-        git checkout temp-binaries-linux
-
-    - name: Checkout macOS temp branch
-      run: |
-        git fetch origin temp-binaries-macos
-        git checkout temp-binaries-macos
-
     - name: Extract version from Cargo.toml
       id: extract_version
       run: |
         VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Checkout and update Linux temp branch
+      run: |
+        git fetch origin temp-binaries-linux
+        git checkout temp-binaries-linux
+        git pull origin temp-binaries-linux
+
+    - name: Checkout and update macOS temp branch
+      run: |
+        git fetch origin temp-binaries-macos
+        git checkout temp-binaries-macos
+        git pull origin temp-binaries-macos
 
     - name: Create Release
       id: create_release
