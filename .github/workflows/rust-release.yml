@@ -15,9 +15,9 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Rust
-      uses: actions/setup-rust@v1
+      uses: actions-rs/toolchain@v1
       with:
-        rust-version: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
+        toolchain: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
 
     - name: Build
       run: cargo build --release
@@ -27,7 +27,11 @@ jobs:
       run: |
         VERSION=$(date +'%Y-%m-%d')
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
-        
+
+        # Install GitHub CLI
+        sudo apt-get install gh
+
+        # Create the release
         gh release create "${VERSION}" target/release/your_binary_name --title "Release ${VERSION}" --notes "Release created on ${VERSION}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
