@@ -18,19 +18,27 @@ jobs:
           version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "version=$version" >> $GITHUB_ENV
 
-      - name: Delete existing tag if it exists
+      - name: Fetch all tags from remote
+        run: |
+          git fetch --tags
+
+      - name: Delete existing tag if it exists locally and remotely
         run: |
           tag="v${{ env.version }}"
-          if git rev-parse "$tag" >/dev/null 2>&1; then
-            echo "Tag $tag exists, deleting..."
+          if git show-ref --tags | grep -q "refs/tags/$tag"; then
+            echo "Tag $tag exists locally, deleting..."
             git tag -d "$tag"
+          else
+            echo "Tag $tag does not exist locally."
+          fi
+          if git ls-remote --tags origin | grep -q "refs/tags/$tag"; then
+            echo "Tag $tag exists remotely, deleting..."
             git push --delete origin "$tag"
           else
-            echo "Tag $tag does not exist, no need to delete."
+            echo "Tag $tag does not exist remotely."
           fi
 
       - name: Create GitHub Release
-        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
