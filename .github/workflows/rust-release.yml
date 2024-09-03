@@ -9,7 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        arch: [x86_64, aarch64] # ARM und x86_64 Architekturen
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -20,9 +23,12 @@ jobs:
         toolchain: '1.70' # Setzen Sie hier die gewünschte Rust-Version ein
 
     - name: Build
-      run: cargo build --release
+      run: cargo build --release --target ${{ matrix.arch }}-${{ matrix.os }}
+      env:
+        CARGO_BUILD_TARGET: ${{ matrix.arch }}-${{ matrix.os }}
 
     - name: Create Release
+      if: success() && matrix.os == 'ubuntu-latest' # Create release only on Ubuntu
       id: create_release
       run: |
         VERSION=$(date +'%Y-%m-%d')
@@ -32,6 +38,12 @@ jobs:
         sudo apt-get install gh
 
         # Create the release
-        gh release create "${VERSION}" target/release/your_binary_name --title "Release ${VERSION}" --notes "Release created on ${VERSION}"
+        gh release create "${VERSION}" target/${{ matrix.arch }}-${{ matrix.os }}/release/dino_cli_game --title "Release ${VERSION}" --notes "Release created on ${VERSION}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dino_cli_game-${{ matrix.os }}-${{ matrix.arch }}
+        path: target/${{ matrix.arch }}-${{ matrix.os }}/release/dino_cli_game
