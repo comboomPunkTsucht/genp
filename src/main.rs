@@ -153,10 +153,11 @@ fn clear_screen(stdout: &mut io::Stdout) {
 }
 
 fn main() {
+    let version = env!("CARGO_PKG_VERSION");
     let command = Command::new("Dino CLI Game")
-        .version("1.0")
-        .author("Ihr Name")
-        .about("Ein einfaches Dino-Spiel")
+        .version(version)
+        .author("comboom.sucht")
+        .about("Google's Dino Game in the Terminal in the language of Rust")
         .arg(
             Arg::new("fps")
                 .long("fps")

@@ -61,6 +61,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Extract version from Cargo.toml
+      id: extract_version
+      run: |
+        VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: List files in target directory
+      run: |
+        ls -R target
+
     - name: Upload Release Artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -71,15 +81,14 @@ jobs:
           target/x86_64-apple-darwin/release/dino_cli_game
           target/aarch64-apple-darwin/release/dino_cli_game
 
-    - name: List files in target directory
-      run: |
-        ls -R target
-
     - name: Create Release
       id: create_release
       run: |
-        VERSION=$(date +'%Y-%m-%d')
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "VERSION=${VERSION}"
+
+        # Install GitHub CLI
+        sudo apt-get update
+        sudo apt-get install -y gh
 
         # Create the release
         gh release create "${VERSION}" \
@@ -88,6 +97,6 @@ jobs:
           target/x86_64-apple-darwin/release/dino_cli_game \
           target/aarch64-apple-darwin/release/dino_cli_game \
           --title "Release ${VERSION}" \
-          --notes "Release created on ${VERSION}"
+          --notes "Release version ${VERSION} created on $(date +'%Y-%m-%d')"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
