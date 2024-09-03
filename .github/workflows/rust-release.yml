@@ -5,8 +5,11 @@ permissions:
 
 on:
   push:
-    tags:
-      - 'v*.*.*'  # Trigger the workflow on tags that follow semantic versioning (e.g., v1.0.0)
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   create-release:
@@ -16,7 +19,6 @@ jobs:
       - id: create-release
         uses: taiki-e/create-gh-release-action@v1
         with:
-          tag: ${{ github.ref }}  # GitHub ref is the tag name (e.g., refs/tags/v1.0.0)
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
