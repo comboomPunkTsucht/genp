@@ -18,6 +18,17 @@ jobs:
           version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "version=$version" >> $GITHUB_ENV
 
+      - name: Delete existing tag if it exists
+        run: |
+          tag="v${{ env.version }}"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag exists, deleting..."
+            git tag -d "$tag"
+            git push --delete origin "$tag"
+          else
+            echo "Tag $tag does not exist, no need to delete."
+          fi
+
       - name: Create GitHub Release
         id: create_release
         env:
@@ -26,4 +37,6 @@ jobs:
           tag="v${{ env.version }}"
           title="v${{ env.version }}"
           description="created on $(date +%Y-%m-%d)"
+          git tag "$tag"
+          git push origin "$tag"
           gh release create "$tag" --title "$title" --notes "$description"
