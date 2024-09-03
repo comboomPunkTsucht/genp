@@ -29,12 +29,12 @@ jobs:
 
       - name: Build for x86_64 Linux
         run: |
-          cargo build --release --target x86_64-unknown-linux-gnu
+          cross build --release --target x86_64-unknown-linux-gnu
           cp target/x86_64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-x86_64
 
       - name: Build for aarch64 Linux
         run: |
-          cargo build --release --target aarch64-unknown-linux-gnu
+          cross build --release --target aarch64-unknown-linux-gnu
           cp target/aarch64-unknown-linux-gnu/release/dino_cli_game dino_cli_game-aarch64
 
       - name: Push Linux binaries to temp branch
@@ -72,9 +72,7 @@ jobs:
 
       - name: Create Universal Binary for macOS
         run: |
-          lipo -create -output dino_cli_game-macos-universal \
-          target/x86_64-apple-darwin/release/dino_cli_game \
-          target/aarch64-apple-darwin/release/dino_cli_game
+          lipo -create -output dino_cli_game-macos-universal target/x86_64-apple-darwin/release/dino_cli_game target/aarch64-apple-darwin/release/dino_cli_game
 
       - name: Push macOS binaries to temp branch
         run: |
