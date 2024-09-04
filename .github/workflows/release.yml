@@ -20,7 +20,11 @@ jobs:
           version=${GITHUB_REF#refs/tags/v}
           echo "version=$version" >> $GITHUB_ENV
 
+      - name: Debug Version
+        run: echo "Version is ${{ env.version }}"
+
       - name: Create Changelog File
+        id: create-changelog
         uses: 1arp/create-a-file-action@0.4.5
         with:
           file: changelog.md
@@ -31,7 +35,11 @@ jobs:
             With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?
             So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go "Whoa, how'd you come up with that?" 🎉
 
-      - id: create-release
+      - name: Check if Changelog Exists
+        run: cat changelog.md
+
+      - name: create-release
+        id: create-release
         uses: taiki-e/create-gh-release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
