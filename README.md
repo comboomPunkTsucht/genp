@@ -7,6 +7,7 @@ With this release, we've added some extra spice to make things even more fun. Wh
 So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go "Whoa, how'd you come up with that?" 🎉
 
 ## Usage
+
 ```
 A simple Generator for PINs and Passwords
 
@@ -21,7 +22,9 @@ Options:
   -h, --help     Print help
   -V, --version  Print version
 ```
+
 ### PIN
+
 ```
 Generates a PIN
 
