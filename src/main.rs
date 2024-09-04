@@ -1,7 +1,7 @@
 use clap::{Command, Arg};
 use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
-use rand::distributions::Alphanumeric;
+use rand::distributions::Uniform;
 
 fn main() {
     // Retrieve environment variables set by the build script
@@ -88,8 +88,13 @@ fn generate_pin(length: u32, seed: Option<&String>) -> String {
 /// Generates a password of a specified length, optionally seeded
 fn generate_password(length: u32, seed: Option<&String>) -> String {
     let mut rng = create_rng(seed);  // Declare rng as mutable
+
+    // Define the character set for the password
+    let charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=";
+    let char_range = Uniform::from(0..charset.len());
+
     (0..length)
-        .map(|_| rng.sample(Alphanumeric) as char)
+        .map(|_| charset.as_bytes()[rng.sample(char_range)] as char)
         .collect::<String>()
 }
 
