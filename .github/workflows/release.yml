@@ -55,89 +55,21 @@ jobs:
     needs: upload-assets
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Download macOS release
+      - name: Extract version from Cargo.toml
+        id: extract_version
         run: |
-          wget https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-universal-apple-darwin.tar.gz -O genp-mac.tar.gz
+          version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$version" >> $GITHUB_ENV
 
-      - name: Download Linux release
+      - name: Submit to Homebrew
         run: |
-          wget https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-x86_64-unknown-linux-gnu.tar.gz -O genp-linux.tar.gz
-
-      - name: Calculate macOS checksum
-        id: macos_checksum
-        run: |
-          echo "sha256=$(shasum -a 256 genp-mac.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
-
-      - name: Calculate Linux checksum
-        id: linux_checksum
-        run: |
-          echo "sha256_linux=$(shasum -a 256 genp-linux.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
-
-      - name: Prepare Homebrew Core Repository
-        run: |
-          if [ -d homebrew-core ]; then
-            rm -rf homebrew-core
-          fi
-          git clone https://github.com/Homebrew/homebrew-core.git /tmp/homebrew-core
-
-      - name: Check if Formula Exists
-        run: |
-          if brew info genp; then
-            echo "Formula exists, updating it..."
-            export FORMULA_EXISTS=true
-          else
-            echo "Formula does not exist, creating a new one..."
-            export FORMULA_EXISTS=false
-          fi
-
-      - name: Generate or Update Homebrew Formula
-        run: |
-          mkdir -p /tmp/homebrew-core/Formula
-          if [ "$FORMULA_EXISTS" = true ]; then
-            echo "Updating existing formula"
-            rm -f /tmp/homebrew-core/Formula/genp.rb
-          fi
-          echo "Creating or updating formula"
-          cat <<EOF > /tmp/homebrew-core/Formula/genp.rb
-          class Genp < Formula
-            desc "A CLI tool for generating passwords and PINs"
-            homepage "https://github.com/comboomPunkTsucht/genp"
-            version "${{ github.ref_name }}"
-            on_macos do
-              url "https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-universal-apple-darwin.tar.gz"
-              sha256 "${{ env.sha256 }}"
-              def install
-                bin.install "genp"
-              end
-            end
-            on_linux do
-              url "https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-x86_64-unknown-linux-gnu.tar.gz"
-              sha256 "${{ env.sha256_linux }}"
-              def install
-                bin.install "genp"
-              end
-            end
-            test do
-              system "#{bin}/genp", "--version"
-            end
-          end
-          EOF
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          path: /tmp/homebrew-core
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: master
-          branch: homebrew-genp
-          title: "Add or Update genp formula"
-          body: |
-            This pull request adds or updates a Homebrew formula for the `genp` package, supporting both macOS and Linux.
-          commit-message: "Add or Update genp formula"
-
-      - name: Cleanup
-        run: |
-          rm -rf /tmp/homebrew-core
+          brew install -v --build-from-source --HEAD homebrew/core/genp
+          brew create https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-universal-apple-darwin.tar.gz --version=${{ env.version }}
+          brew create https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-x86_64-unknown-linux-gnu.tar.gz --version=${{ env.version }}
+          brew install --interactive homebrew/core/genp
+          brew audit --strict homebrew/core/genp
+          brew pr-upload
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
