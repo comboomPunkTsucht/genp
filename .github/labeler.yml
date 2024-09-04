@@ -1,0 +1,31 @@
+# This configuration file defines labels to be applied based on modified paths
+# in pull requests. Adjust the paths and labels according to your project needs.
+
+# Label the pull request based on the directories/files changed
+labels:
+  # Apply 'rust' label if changes are in Rust source files
+  rust:
+    - 'src/**'
+    - 'Cargo.toml'
+    - 'Cargo.lock'
+
+  # Apply 'tests' label if changes are in the tests directory
+  tests:
+    - 'tests/**'
+
+  # Apply 'docs' label if changes are in documentation files
+  docs:
+    - 'docs/**'
+    - '*.md'
+
+  # Apply 'config' label if changes are in configuration files
+  config:
+    - 'Cargo.toml'
+    - 'Cargo.lock'
+    - '.github/**'
+
+  # Apply 'build' label if changes are in build scripts or configurations
+  build:
+    - 'build/**'
+    - 'scripts/**'
+    - 'build.rs'
