@@ -1,4 +1,4 @@
-name: Build and Release Rust CLI - 2
+name: Build and Release Rust CLI
 
 permissions:
   contents: write
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: dino_cli_game  # Replace with your actual binary name(s)
+          bin: genp  # Replace with your actual binary name(s)
           target: ${{ matrix.target }}
           tar: unix  # Change as needed based on distribution preference
           zip: windows  # Change as needed based on distribution preference

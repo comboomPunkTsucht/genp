@@ -1,7 +1,10 @@
 [package]
-name = "dino_cli_game"
+name = "genp"
 version = "0.1.0"
+description = "A simple Generator for PINs and Passwords"
+authors = ["comboom.sucht","mcpeaps_HD"]
 edition = "2021"
 
 [dependencies]
 clap = "4.5.16"
+rand = "0.8.5"
