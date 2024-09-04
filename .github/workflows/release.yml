@@ -21,14 +21,15 @@ jobs:
           echo "version=$version" >> $GITHUB_ENV
 
       - name: Create Changelog File
-        run: |
-          echo "# Genp v${{ env.version }}" > changelog.md
-          echo "" >> changelog.md
-          echo "Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault." >> changelog.md
-          echo "" >> changelog.md
-          echo "With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?" >> changelog.md
-          echo "" >> changelog.md
-          echo "So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go \"Whoa, how'd you come up with that?\" 🎉" >> changelog.md
+        uses: 1arp/create-a-file-action@0.4.5
+        with:
+          file: changelog.md
+          isAbsolutePath: false
+          content: |
+            # Genp v${{ env.version }}
+            Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault.
+            With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?
+            So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go "Whoa, how'd you come up with that?" 🎉
 
       - id: create-release
         uses: taiki-e/create-gh-release-action@v1
