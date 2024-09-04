@@ -81,7 +81,7 @@ jobs:
           if [ -d homebrew-core ]; then
             rm -rf homebrew-core
           fi
-          git clone https://github.com/Homebrew/homebrew-core.git
+          git clone https://github.com/Homebrew/homebrew-core.git /tmp/homebrew-core
 
       - name: Check if Formula Exists
         run: |
@@ -95,13 +95,13 @@ jobs:
 
       - name: Generate or Update Homebrew Formula
         run: |
-          mkdir -p homebrew-core/Formula
+          mkdir -p /tmp/homebrew-core/Formula
           if [ "$FORMULA_EXISTS" = true ]; then
             echo "Updating existing formula"
-            rm -f homebrew-core/Formula/genp.rb
+            rm -f /tmp/homebrew-core/Formula/genp.rb
           fi
           echo "Creating or updating formula"
-          cat <<EOF > homebrew-core/Formula/genp.rb
+          cat <<EOF > /tmp/homebrew-core/Formula/genp.rb
           class Genp < Formula
             desc "A CLI tool for generating passwords and PINs"
             homepage "https://github.com/comboomPunkTsucht/genp"
@@ -129,6 +129,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
+          path: /tmp/homebrew-core
           token: ${{ secrets.GITHUB_TOKEN }}
           base: master
           branch: homebrew-genp
@@ -139,4 +140,4 @@ jobs:
 
       - name: Cleanup
         run: |
-          rm -rf homebrew-core
+          rm -rf /tmp/homebrew-core
