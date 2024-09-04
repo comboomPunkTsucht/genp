@@ -1,0 +1,95 @@
+name: Submit Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  submit-formula:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Download macOS release
+      run: |
+        wget https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.event.release.tag_name }}/genp-universal-apple-darwin.tar.gz -O genp-mac.tar.gz
+
+    - name: Download Linux release
+      run: |
+        wget https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.event.release.tag_name }}/genp-x86_64-unknown-linux-gnu.tar.gz -O genp-linux.tar.gz
+
+    - name: Calculate macOS checksum
+      id: macos_checksum
+      run: |
+        echo "sha256=$(shasum -a 256 genp-mac.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
+
+    - name: Calculate Linux checksum
+      id: linux_checksum
+      run: |
+        echo "sha256_linux=$(shasum -a 256 genp-linux.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
+
+    - name: Generate Homebrew Formula
+      run: |
+        mkdir -p homebrew-core/Formula
+        cat <<EOF > homebrew-core/Formula/genp.rb
+        class Genp < Formula
+          desc "A CLI tool for generating passwords and PINs"
+          homepage "https://github.com/comboomPunkTsucht/genp"
+          version "${{ github.event.release.tag_name }}"
+
+          on_macos do
+            url "https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.event.release.tag_name }}/genp-universal-apple-darwin.tar.gz"
+            sha256 "${{ env.sha256 }}"
+            def install
+              bin.install "genp"
+            end
+          end
+
+          on_linux do
+            url "https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.event.release.tag_name }}/genp-x86_64-unknown-linux-gnu.tar.gz"
+            sha256 "${{ env.sha256_linux }}"
+            def install
+              bin.install "genp"
+            end
+          end
+
+          test do
+            system "#{bin}/genp", "--version"
+          end
+        end
+        EOF
+
+    - name: Install Homebrew
+      run: |
+        git clone https://github.com/Homebrew/homebrew-core.git
+        cd homebrew-core
+        brew tap-new user/homebrew-tap
+        brew tap user/homebrew-tap
+
+    - name: Test Formula on macOS
+      if: runner.os == 'macOS'
+      run: |
+        cd homebrew-core
+        brew install --build-from-source ./Formula/genp.rb
+
+    - name: Test Formula on Linux
+      if: runner.os == 'Linux'
+      run: |
+        cd homebrew-core
+        brew install --build-from-source ./Formula/genp.rb
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        base: master
+        branch: homebrew-genp
+        title: "Add genp formula"
+        body: |
+          This pull request adds a Homebrew formula for the `genp` package, supporting both macOS and Linux.
+        commit-message: "Add genp formula"
+
+    - name: Cleanup
+      run: |
+        rm -rf homebrew-core
