@@ -22,7 +22,9 @@ jobs:
 
       - name: Create Changelog File
         run: |
-          echo "Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault." > changelog.md
+          echo "# Genp v${{ env.version }}" > changelog.md
+          echo "" >> changelog.md
+          echo "Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault." >> changelog.md
           echo "" >> changelog.md
           echo "With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?" >> changelog.md
           echo "" >> changelog.md
