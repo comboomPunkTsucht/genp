@@ -2,28 +2,32 @@
 # in pull requests. Adjust the paths and labels according to your project needs.
 
 # Apply labels based on the directories/files changed
-labels:
+rust:
   - name: rust
     paths:
       - 'src/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
 
+tests:
   - name: tests
     paths:
       - 'tests/**'
 
-  - name: docs
+documentation:
+  - name: documentation
     paths:
       - 'docs/**'
       - '*.md'
 
+config:
   - name: config
     paths:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/**'
 
+build:
   - name: build
     paths:
       - 'build/**'
