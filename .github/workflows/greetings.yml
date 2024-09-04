@@ -14,7 +14,7 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         issue-message: |
           Ahoy, fearless problem-solver! 🌟
-          You've just dropped an issue into the Genp vault, but don’t worry—we don’t keep passwords here! 🔐
+          You've just dropped an issue into the Genp vault, but don’t worry — we don’t keep passwords here! 🔐
           Genp is all about generating fresh, secure passwords and PINs — nothing gets saved, so your secrets stay secret. 🤫
           We’re excited to dive into this with you. Thanks for helping us make Genp even better! 🎉
 
