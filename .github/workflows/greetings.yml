@@ -1,0 +1,25 @@
+name: Greetings
+
+on: [pull_request_target, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: |
+          Ahoy, fearless problem-solver! 🌟
+          You've just dropped an issue into the Genp vault, but don’t worry—we don’t keep passwords here! 🔐
+          Genp is all about generating fresh, secure passwords and PINs — nothing gets saved, so your secrets stay secret. 🤫
+          We’re excited to dive into this with you. Thanks for helping us make Genp even better! 🎉
+
+        pr-message: |
+          Whoa, PR incoming! 🚀
+          You've added some fresh code magic to Genp! 🧙‍♂️✨ While Genp doesn’t store passwords (we’re all about generating, not saving!), your contribution will make password protection even more powerful. 🔒
+          Thanks for helping secure the world one password at a time — with no secret stash! 🛡️💻
+          We’re diving in to review faster than a hacker can try “password123!” 🔥
