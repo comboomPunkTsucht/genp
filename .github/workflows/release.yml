@@ -75,6 +75,10 @@ jobs:
             os: ubuntu-latest
             os-name: linux
             arch: x86_64
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            os-name: linux
+            arch: aarch64
           - target: universal-apple-darwin
             os: macos-latest
             os-name: macos
@@ -90,6 +94,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Extract Version
+        id: extract_version
+        run: |
+          version=${GITHUB_REF#refs/tags/v}
+          echo "version=$version" >> $GITHUB_ENV
 
       - uses: taiki-e/upload-rust-binary-action@v1
         with:

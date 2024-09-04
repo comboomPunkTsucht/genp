@@ -1,6 +1,6 @@
 [package]
 name = "genp"
-version = "1.0.13"
+version = "1.0.14"
 description = "A simple Generator for PINs and Passwords"
 authors = ["comboom.sucht","mcpeaps_HD"]
 edition = "2021"
