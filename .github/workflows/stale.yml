@@ -1,0 +1,35 @@
+# This workflow gives a friendly nudge to issues and PRs that have been taking a nap for a while.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/actions/stale
+name: Keep Issues and PRs Fresh
+
+on:
+  schedule:
+  - cron: '33 12 * * *'
+
+jobs:
+  stale:
+
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+    - uses: actions/stale@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: |
+          🌟 **Hey there!** 🌟
+          It looks like this issue has been snoozing for a bit. If you’re still working on it, we’d love to hear from you! 🚀
+          If it’s no longer relevant, no worries—just give us a shout, and we’ll tidy things up. Thanks for helping us keep the repo fresh! 🌱
+          
+        stale-pr-message: |
+          👋 **Hello there!** 👋
+          Your pull request seems to be enjoying a long vacation. 🏖️ If you’re still polishing it, we’d love to see the updates! 🔄
+          If it’s not on your to-do list anymore, no problem—just let us know, and we’ll help get things back on track. Thanks for keeping things moving! 🚀
+          
+        stale-issue-label: 'no-issue-activity'
+        stale-pr-label: 'no-pr-activity'
