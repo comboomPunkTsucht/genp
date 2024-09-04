@@ -3,33 +3,23 @@
 
 # Apply labels based on the directories/files changed
 rust:
-  - name: rust
-    paths:
-      - 'src/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
+  - 'src/**'
+  - 'Cargo.toml'
+  - 'Cargo.lock'
 
 tests:
-  - name: tests
-    paths:
-      - 'tests/**'
+  - 'tests/**'
 
 documentation:
-  - name: documentation
-    paths:
-      - 'docs/**'
-      - '*.md'
+  - 'docs/**'
+  - '*.md'
 
 config:
-  - name: config
-    paths:
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - '.github/**'
+  - 'Cargo.toml'
+  - 'Cargo.lock'
+  - '.github/**'
 
 build:
-  - name: build
-    paths:
-      - 'build/**'
-      - 'scripts/**'
-      - 'build.rs'
+  - 'build/**'
+  - 'scripts/**'
+  - 'build.rs'
