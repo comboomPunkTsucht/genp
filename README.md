@@ -1,2 +1,2 @@
-# Dino Cli Game
-Google's Dino Game in the Terminal in the language of Rust
+# genp
+A simple Generator for PINs and Passwords

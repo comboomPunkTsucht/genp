@@ -1,10 +1,10 @@
 use std::fs;
 
 fn main() {
-    // Lese Cargo.toml zur Build-Zeit
+    // Read Cargo.toml at build time
     let content = fs::read_to_string("Cargo.toml").expect("Failed to read Cargo.toml");
 
-    // Extrahiere die Versionsnummer
+    // Extract the version number
     let version_line = content
         .lines()
         .find(|line| line.starts_with("version = "))
@@ -16,7 +16,7 @@ fn main() {
         .trim()
         .trim_matches('"');
 
-    // Extrahiere den Namen
+    // Extract the name
     let name_line = content
         .lines()
         .find(|line| line.starts_with("name = "))
@@ -28,7 +28,7 @@ fn main() {
         .trim()
         .trim_matches('"');
 
-    // Extrahiere die Beschreibung
+    // Extract the description
     let description_line = content
         .lines()
         .find(|line| line.starts_with("description = "))
@@ -40,7 +40,7 @@ fn main() {
         .trim()
         .trim_matches('"');
 
-    // Extrahiere die Ersteller (Liste von Autoren)
+    // Extract the authors (list of authors)
     let authors_line = content
         .lines()
         .find(|line| line.starts_with("authors = "))
@@ -56,6 +56,7 @@ fn main() {
         .collect::<Vec<&str>>()
         .join(", ");
 
+    // Print commands to cargo to rerun the script if Cargo.toml changes
     println!("cargo:rerun-if-changed=Cargo.toml");
     println!("cargo:version={}", version);
     println!("cargo:name={}", name);
