@@ -53,7 +53,7 @@ jobs:
   # Step 3: Submit to Homebrew
   submit-formula:
     needs: upload-assets
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
