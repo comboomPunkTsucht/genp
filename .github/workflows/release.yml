@@ -23,6 +23,15 @@ jobs:
       - name: Debug Version
         run: echo "Version is ${{ env.version }}"
 
+      - name: Extract Date
+        id: extract_date
+        run: |
+          date=$(date +'%Y-%m-%d')
+          echo "date=$date" >> $GITHUB_ENV
+
+      - name: Debug Date
+        run: echo "Date is ${{ env.date }}"
+
       - name: Create Changelog File
         id: create-changelog
         uses: 1arp/create-a-file-action@0.4.5
@@ -30,7 +39,18 @@ jobs:
           file: changelog.md
           isAbsolutePath: false
           content: |
-            # Genp v${{ env.version }}
+            # Changelog
+
+            All notable changes to this project will be documented in this file.
+
+            This project adheres to [Semantic Versioning](https://semver.org).
+
+            <!--
+            Note: In this file, do not use the hard wrap in the middle of a sentence for compatibility with GitHub comment style markdown rendering.
+            -->
+
+            ## [Unreleased]
+            ## [v${{ env.version }}] - ${{ env.date }}
             Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault.
             With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?
             So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go "Whoa, how'd you come up with that?" 🎉
@@ -38,7 +58,7 @@ jobs:
       - name: Check if Changelog Exists
         run: cat changelog.md
 
-      - name: create-release
+      - name: Create GitHub Release
         id: create-release
         uses: taiki-e/create-gh-release-action@v1
         with:
