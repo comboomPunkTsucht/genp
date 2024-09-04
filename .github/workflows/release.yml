@@ -1,4 +1,4 @@
-name: Build, Release, and Submit to Homebrew
+name: Genp - Build, Release, and Submit to Homebrew (with a twist!)
 
 permissions:
   contents: write
@@ -6,27 +6,31 @@ permissions:
 on:
   push:
     tags:
-      - 'v*.*.*'  # Trigger on tags that match this pattern, e.g., v1.0.0
+      - 'v*.*.*'
 
 jobs:
-  # Step 1: Create the release
+
   create-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Extract version from Cargo.toml
         id: extract_version
         run: |
           version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "version=$version" >> $GITHUB_ENV
-
       - id: create-release
         uses: taiki-e/create-gh-release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          title: Genp v${{ env.version }} - Unlocking the Password Vault!
+          changelog: |
+            Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault.
 
-  # Step 2: Upload assets to the release
+            With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?
+
+            So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go "Whoa, how'd you come up with that?" 🎉
+
   upload-assets:
     needs: create-release
     strategy:
@@ -34,42 +38,33 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
+            os-name: linux
+            arch: x86_64
           - target: universal-apple-darwin
             os: macos-latest
+            os-name: macos
+            arch: universal
           - target: x86_64-pc-windows-msvc
             os: windows-latest
+            os-name: windows
+            arch: x86_64
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+            os-name: windows
+            arch: aarch64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: genp  # Replace with your actual binary name(s)
-          target: ${{ matrix.target }}
-          tar: unix  # Change as needed based on distribution preference
-          zip: windows  # Change as needed based on distribution preference
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  # Step 3: Submit to Homebrew
-  submit-formula:
-    needs: upload-assets
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Extract version from Cargo.toml
         id: extract_version
         run: |
           version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "version=$version" >> $GITHUB_ENV
-
-      - name: Submit to Homebrew
-        run: |
-          brew install -v --build-from-source --HEAD homebrew/core/genp
-          brew create https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-universal-apple-darwin.tar.gz --version=${{ env.version }}
-          brew create https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-x86_64-unknown-linux-gnu.tar.gz --version=${{ env.version }}
-          brew install --interactive homebrew/core/genp
-          brew audit --strict homebrew/core/genp
-          brew pr-upload
-        env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: genp
+          target: ${{ matrix.target }}
+          tar: unix
+          zip: windows
+          archive: genp-v${{ env.version }}-${{ matrix.os-name }}-${{ matrix.arch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
