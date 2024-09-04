@@ -48,3 +48,5 @@ Options:
   -s, --seed <seed>      Sets the seed for generating the password
   -h, --help             Print help
 ```
+
+test
