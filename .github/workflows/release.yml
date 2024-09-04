@@ -76,6 +76,18 @@ jobs:
         run: |
           echo "sha256_linux=$(shasum -a 256 genp-linux.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
 
+      - name: Install Linuxbrew on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl file git
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
+          test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
+          echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
+          brew update
+
       - name: Prepare Homebrew Core Repository
         run: |
           if [ -d homebrew-core ]; then
@@ -83,15 +95,29 @@ jobs:
           fi
           git clone https://github.com/Homebrew/homebrew-core.git
 
-      - name: Generate Homebrew Formula
+      - name: Check if Formula Exists
+        run: |
+          if brew info genp; then
+            echo "Formula exists, updating it..."
+            export FORMULA_EXISTS=true
+          else
+            echo "Formula does not exist, creating a new one..."
+            export FORMULA_EXISTS=false
+          fi
+
+      - name: Generate or Update Homebrew Formula
         run: |
           mkdir -p homebrew-core/Formula
+          if [ "$FORMULA_EXISTS" = true ]; then
+            echo "Updating existing formula"
+            rm -f homebrew-core/Formula/genp.rb
+          fi
+          echo "Creating or updating formula"
           cat <<EOF > homebrew-core/Formula/genp.rb
           class Genp < Formula
             desc "A CLI tool for generating passwords and PINs"
             homepage "https://github.com/comboomPunkTsucht/genp"
             version "${{ github.ref_name }}"
-
             on_macos do
               url "https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-universal-apple-darwin.tar.gz"
               sha256 "${{ env.sha256 }}"
@@ -99,7 +125,6 @@ jobs:
                 bin.install "genp"
               end
             end
-
             on_linux do
               url "https://github.com/comboomPunkTsucht/genp/releases/download/${{ github.ref_name }}/genp-x86_64-unknown-linux-gnu.tar.gz"
               sha256 "${{ env.sha256_linux }}"
@@ -107,7 +132,6 @@ jobs:
                 bin.install "genp"
               end
             end
-
             test do
               system "#{bin}/genp", "--version"
             end
@@ -132,10 +156,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: master
           branch: homebrew-genp
-          title: "Add genp formula"
+          title: "Add or Update genp formula"
           body: |
-            This pull request adds a Homebrew formula for the `genp` package, supporting both macOS and Linux.
-          commit-message: "Add genp formula"
+            This pull request adds or updates a Homebrew formula for the `genp` package, supporting both macOS and Linux.
+          commit-message: "Add or Update genp formula"
 
       - name: Cleanup
         run: |
