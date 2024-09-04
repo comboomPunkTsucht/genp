@@ -76,6 +76,13 @@ jobs:
         run: |
           echo "sha256_linux=$(shasum -a 256 genp-linux.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
 
+      - name: Prepare Homebrew Core Repository
+        run: |
+          if [ -d homebrew-core ]; then
+            rm -rf homebrew-core
+          fi
+          git clone https://github.com/Homebrew/homebrew-core.git
+
       - name: Generate Homebrew Formula
         run: |
           mkdir -p homebrew-core/Formula
@@ -106,13 +113,6 @@ jobs:
             end
           end
           EOF
-
-      - name: Install Homebrew
-        run: |
-          git clone https://github.com/Homebrew/homebrew-core.git
-          cd homebrew-core
-          brew tap-new user/homebrew-tap
-          brew tap user/homebrew-tap
 
       - name: Test Formula on macOS
         if: runner.os == 'macOS'
