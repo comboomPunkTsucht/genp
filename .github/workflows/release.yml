@@ -1,4 +1,4 @@
-name: Genp - Build, Release, and Submit to Homebrew (with a twist!)
+name: Genp - Build, Release (with a twist!)
 
 permissions:
   contents: write
@@ -9,27 +9,31 @@ on:
       - 'v*.*.*'
 
 jobs:
-
   create-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract version from Cargo.toml
+
+      - name: Extract Version
         id: extract_version
         run: |
-          version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          version=${GITHUB_REF#refs/tags/v}
           echo "version=$version" >> $GITHUB_ENV
+
+      - name: Create Changelog File
+        run: |
+          echo "Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault." > changelog.md
+          echo "" >> changelog.md
+          echo "With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?" >> changelog.md
+          echo "" >> changelog.md
+          echo "So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go \"Whoa, how'd you come up with that?\" 🎉" >> changelog.md
+
       - id: create-release
         uses: taiki-e/create-gh-release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Genp v${{ env.version }} - Unlocking the Password Vault!
-          changelog: |
-            Hey there, folks! It's time to unleash the power of Genp v${{ env.version }} - the ultimate CLI tool for generating secure passwords and PINs that'll keep your data safer than a bank vault.
-
-            With this release, we've added some extra spice to make things even more fun. Who needs boring old passwords when you can have funky fresh ones straight from the Genp factory?
-
-            So, what are you waiting for? Grab your copy and start generating passwords that'll make your friends go "Whoa, how'd you come up with that?" 🎉
+          changelog: changelog.md
 
   upload-assets:
     needs: create-release
@@ -55,11 +59,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Extract version from Cargo.toml
-        id: extract_version
-        run: |
-          version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-          echo "version=$version" >> $GITHUB_ENV
+
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: genp
