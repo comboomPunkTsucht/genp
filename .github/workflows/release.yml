@@ -19,18 +19,22 @@ jobs:
         run: |
           version=${GITHUB_REF#refs/tags/v}
           echo "version=$version" >> $GITHUB_ENV
+        shell: bash
 
       - name: Debug Version
         run: echo "Version is ${{ env.version }}"
+        shell: bash
 
       - name: Extract Date
         id: extract_date
         run: |
           date=$(date +'%Y-%m-%d')
           echo "date=$date" >> $GITHUB_ENV
+        shell: bash
 
       - name: Debug Date
         run: echo "Date is ${{ env.date }}"
+        shell: bash
 
       - name: Create Changelog File
         id: create-changelog
@@ -57,6 +61,7 @@ jobs:
 
       - name: Check if Changelog Exists
         run: cat changelog.md
+        shell: bash
 
       - name: Create GitHub Release
         id: create-release
@@ -100,6 +105,7 @@ jobs:
         run: |
           version=${GITHUB_REF#refs/tags/v}
           echo "version=$version" >> $GITHUB_ENV
+        shell: bash
 
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
